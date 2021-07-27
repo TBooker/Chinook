@@ -1,0 +1,44 @@
+// set up a simple neutral simulation
+initialize() {
+	defineConstant("N", 5000);
+
+	initializeMutationRate(1e-7);
+	
+	// m1 mutation type: neutral
+	initializeMutationType("m1", 0.5, "f", 0.0);
+	// m2 the red/white carotenoid deposition mutation 	
+	initializeMutationType("m2", 0.5, "f", 0.1);
+
+
+	// g1 genomic element type: uses m1 for all mutations
+	initializeGenomicElementType("g1", m1, 1.0);
+	
+	// uniform chromosome of length 100 kb with uniform recombination
+	initializeGenomicElement(g1, 0, 999999);
+	initializeRecombinationRate(1e-7);
+}
+
+// create a population of 500 individuals
+1 {
+	sim.addSubpop("p1", N);
+}
+
+// output samples of 10 genomes periodically, all fixed mutations at end
+1000 late() { 
+	target = sample(p1.genomes, 1);
+	target.addNewDrawnMutation(m2, 50000);
+}
+101:1000 late(){
+	muts = sim.mutations.mutationType == m2;
+
+}
+
+fitness(m2, p1){
+		return 1.5 - sim.mutationFrequencies(p1, mut);
+}
+
+5000 late() { p1.outputSample(10); 
+				freq = (sum(sim.substitutions.mutationType == m2) == 1);
+//				sim.mutationFrequencies() >= 0.5
+}
+5000 late() { sim.outputFixedMutations(); }
