@@ -16,7 +16,7 @@ rm GCF_002872995.1_Otsh_v1.0_genomic.CDS.gff.gz
 
 tabix GCF_002872995.1_Otsh_v1.0_genomic.CDS.sort.gff.gz NC_037126.1:1-5000000 > SalmonAnnotation_firstMb.cds.gff
 
-tabix GCF_002872995.1_Otsh_v1.0_genomic.CDS.sort.gff.gz NC_037126.1:37500000-42500000 > SalmonAnnotation_selectedRegion.cds.gff
+tabix GCF_002872995.1_Otsh_v1.0_genomic.CDS.sort.gff.gz NC_037126.1:37500000-42000000 > SalmonAnnotation_selectedRegion.cds.gff
 
 cat SalmonAnnotation_firstMb.cds.gff SalmonAnnotation_selectedRegion.cds.gff > SalmonAnnotation_forSLiM.gff
 
@@ -27,11 +27,11 @@ rm SalmonAnnotation_selectedRegion.cds.gff
 # merge overlapping elements - we don't care about genome integrity here
 ~/software/bedtools2/bin/mergeBed -d 2 -i SalmonAnnotation_forSLiM.gff > SalmonAnnotation_forSLiM.merged.bed
 
- 
+
 # Delete intermediate files:
 rm SalmonAnnotation_forSLiM.gff
 
-# Convert the output to SLiM readable format 
+# Convert the output to SLiM readable format
 python BED_to_SLiM.py SalmonAnnotation_forSLiM.merged.bed  > SLiM_annotations_from_GFF.txt
 
 # Delete intermediate files:
@@ -48,15 +48,21 @@ rm SalmonAnnotation_forSLiM.merged.bed
 # Generate TABIX index
 tabix GCF_002872995.1_Otsh_v1.0_genomic.sort.gff.gz
 
-tabix GCF_002872995.1_Otsh_v1.0_genomic.sort.gff.gz NC_037126.1:1-5000000 > .gff
+tabix GCF_002872995.1_Otsh_v1.0_genomic.sort.gff.gz NC_037126.1:1-4950000 > SalmonAnnotation_firstMb.gff
 
 python subPositions.py SalmonAnnotation_firstMb.gff 0 > SalmonAnnotation_firstMb.subbed.gff
 
-tabix GCF_002872995.1_Otsh_v1.0_genomic.sort.gff.gz NC_037126.1:37500000-42500000 > SalmonAnnotation_selectedRegion.gff
+tabix GCF_002872995.1_Otsh_v1.0_genomic.sort.gff.gz NC_037126.1:37500000-42000000 > SalmonAnnotation_selectedRegion.gff
 
 python subPositions.py SalmonAnnotation_selectedRegion.gff 37500000 > SalmonAnnotation_selectedRegion.subbed.gff
 
 cat SalmonAnnotation_firstMb.subbed.gff SalmonAnnotation_selectedRegion.subbed.gff > SalmonAnnotations_forIGV.gff
+
+# Sub the "=" for " " in the GFF so that it can play nice with Polyester
+sed 's/=/ /g' SalmonAnnotations_forIGV.gff >SalmonAnnotations_forPolyester.gff
+
+# Make a gene-2-transcript map for the Salmon data:
+python ../SimulateReads/bin/transcript_2_gene_map.py SalmonAnnotations_forPolyester.gff > SalmonAnnotations_gene2transcript_map_ref
 
 # Delete intermediate files:
 rm SalmonAnnotation_firstMb.gff

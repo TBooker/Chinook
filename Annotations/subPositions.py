@@ -1,13 +1,13 @@
 import sys
 
 if len(sys.argv) < 3:
-	print("USAGE:\n\tpython subPositions.py InputGFF numberOfBases") 
+	print("USAGE:\n\tpython subPositions.py InputGFF numberOfBases")
 	sys.exit()
 
 for i in open(sys.argv[1]):
-	line = i.split()
+	line = i.strip().split("\t")
 	if line[2] == "region": continue
-	
+
 	if int(line[3]) <= 5000000 or int(line[4]) <= 5000000:
 		line[0]= "chr_1"
 	elif int(line[3]) > 5000000:
